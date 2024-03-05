@@ -53,8 +53,8 @@ namespace mf_api_web_services_fuel_manager.Controllers
         {
             //validação
             if (id != model.Id) return BadRequest();
-
-            var modeloDB = await _context.Veiculos
+            //colocar o as notraking para funcionar
+            var modeloDB = await _context.Veiculos.AsNoTracking()
                 .FirstOrDefaultAsync(c => c.Id == id);
 
             if(modeloDB == null) NotFound();
@@ -62,10 +62,27 @@ namespace mf_api_web_services_fuel_manager.Controllers
             _context.Veiculos.Update(model);
             await _context.SaveChangesAsync();
             
-            //ja passou a atualização e não espera receber nada
+            //ja passou a atualização e não espera receber nada 204
             return NoContent();
            
         }
+
+        //HttpDelete
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> Delete(int id) 
+        {
+            var model = await _context.Veiculos.FindAsync(id);
+
+            if (model == null) NotFound();
+
+            _context.Veiculos.Remove(model);
+            await _context.SaveChangesAsync();
+
+            return Ok(model);
+
+        }
+
+
 
 
 
