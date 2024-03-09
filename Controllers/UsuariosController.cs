@@ -22,16 +22,23 @@ namespace mf_api_web_services_fuel_manager.Controllers
             return Ok(model);
         }
         [HttpPost]
-        public async Task<ActionResult> Create(Usuario model)
+        public async Task<ActionResult> Create(UsuarioDto model)
         {
-           
 
-            _context.Usuarios.Add(model);
+            Usuario novo = new Usuario()
+            {
+                Nome = model.Nome,
+                Password = BCrypt.Net.BCrypt.HashPassword(model.Password),
+                Perfil = model.Perfil
+            };
+
+            model.Password = BCrypt.Net.BCrypt.HashPassword(model.Password);
+            _context.Usuarios.Add(novo);
             await _context.SaveChangesAsync();
 
             //metodo 201 nome do metodo , rota e modelo
 
-            return CreatedAtAction("GetById", new { id = model.Id }, model);
+            return CreatedAtAction("GetById", new { id = novo.Id }, novo);
         }
 
         [HttpGet("{id}")]
@@ -55,7 +62,11 @@ namespace mf_api_web_services_fuel_manager.Controllers
 
             if (modeloDB == null) return NotFound();
 
-            _context.Usuarios.Update(model);
+            modeloDB.Nome = model.Nome;
+            modeloDB.Password = BCrypt.Net.BCrypt.HashPassword(model.Password);
+            modeloDB.Perfil = model.Perfil;
+
+            _context.Usuarios.Update(modeloDB);
             await _context.SaveChangesAsync();
 
             //ja passou a atualização e não espera receber nada 204
